@@ -16,6 +16,7 @@ from apscheduler.triggers.cron import CronTrigger
 from concurrent.futures.process import BrokenProcessPool
 
 from app.backup.schedule import panel_zone
+from app.clock import beijing_text
 from app.backup.store import append_log, load_tasks
 from app.backup.worker import execute_task
 
@@ -77,7 +78,7 @@ def _record_crash(event) -> None:
     if not match:
         return
     message = str(getattr(event, "exception", "") or "备份进程异常").replace("\n", " ")[:400]
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    stamp = beijing_text()
     try:
         append_log(
             int(match.group(1)),

@@ -6,6 +6,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
+from app.clock import BEIJING
 from app.config import DATA_DIR
 from app.logs.geo import place
 from app.logs.store import LogError
@@ -65,7 +66,9 @@ def setup_runtime_log() -> None:
         return
     handler = RotatingFileHandler(path, maxBytes=2_000_000, backupCount=1, encoding="utf-8")
     handler.name = "panel-runtime"
-    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    formatter.converter = lambda timestamp: datetime.fromtimestamp(timestamp, BEIJING).timetuple()
+    handler.setFormatter(formatter)
     root.addHandler(handler)
 
 
@@ -170,7 +173,7 @@ def _ssh(line: str) -> dict | None:
         return None
     ip = matched.group("ip")
     try:
-        stamp = datetime.fromisoformat(matched.group("ts")).astimezone().strftime("%Y-%m-%d %H:%M:%S")
+        stamp = datetime.fromisoformat(matched.group("ts")).astimezone(BEIJING).strftime("%Y-%m-%d %H:%M:%S")
     except ValueError:
         stamp = matched.group("ts")[:19].replace("T", " ")
     located = place(ip)

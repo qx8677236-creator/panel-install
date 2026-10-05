@@ -20,6 +20,7 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Optional
 
+from app.clock import beijing_text
 from app.files.security import FileOpError, PathJailError, display_path, locate, raise_jail
 from app.nginx.layout import NginxLayout, get_layout
 from app.nginx.listen import (
@@ -1564,7 +1565,7 @@ def _cert_expiry(path: Path) -> str:
         when = parsedate_to_datetime(matched.group(1).strip())
     except (TypeError, ValueError, OverflowError):
         return ""
-    return when.strftime("%Y-%m-%d %H:%M:%S")
+    return beijing_text(when)
 
 
 def _available(layout: NginxLayout, domain: str) -> Path:
@@ -1995,4 +1996,4 @@ def _delete_site_certs(layout: NginxLayout, domain: str, site: dict) -> None:
 
 
 def _now() -> str:
-    return time.strftime("%Y-%m-%d %H:%M:%S")
+    return beijing_text()

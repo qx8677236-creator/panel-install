@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import sqlite3
 import threading
-from datetime import datetime
 
+from app.clock import beijing_text, server_clock_is_utc, utc_wall_to_beijing
 from app.config import DATA_DIR
 from app.logs.geo import place
 
@@ -45,6 +45,15 @@ def connect() -> sqlite3.Connection:
     )
     connection.execute("CREATE INDEX IF NOT EXISTS idx_panel_logs_id ON panel_logs(id)")
     connection.execute("CREATE INDEX IF NOT EXISTS idx_panel_logs_type ON panel_logs(type)")
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS panel_meta (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+        """
+    )
+    _use_beijing(connection)
     return connection
 
 
@@ -53,12 +62,34 @@ def _clean(value: str, limit: int) -> str:
     return text[:limit]
 
 
+def _use_beijing(connection: sqlite3.Connection) -> None:
+    """旧记录按服务器本地时钟写入。这台机器是 UTC 时，只把它们加 8 小时一次。"""
+    connection.execute("BEGIN IMMEDIATE")
+    try:
+        row = connection.execute("SELECT value FROM panel_meta WHERE key = 'time_zone'").fetchone()
+        if row is None:
+            if server_clock_is_utc():
+                stored = connection.execute("SELECT id, created_at FROM panel_logs").fetchall()
+                for item in stored:
+                    connection.execute(
+                        "UPDATE panel_logs SET created_at = ? WHERE id = ?",
+                        (utc_wall_to_beijing(item["created_at"]), item["id"]),
+                    )
+            connection.execute(
+                "INSERT INTO panel_meta(key, value) VALUES ('time_zone', 'Asia/Shanghai')"
+            )
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+
+
 def write_log(operator: str, log_type: str, details: str, ip: str, limit: int = 320) -> None:
     user = _clean(operator, 32) or "未知"
     kind = _clean(log_type, 20) or "操作"
     text = _clean(details, limit if limit > 0 else 320) or "执行了操作"
     host = _clean(ip, 64) or "unknown"
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    stamp = beijing_text()
     with _lock:
         connection = connect()
         try:

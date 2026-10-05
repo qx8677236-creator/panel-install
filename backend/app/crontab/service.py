@@ -7,9 +7,9 @@ import os
 import re
 import subprocess
 import threading
-from datetime import datetime
 from pathlib import Path
 
+from app.clock import beijing_text
 from app.nginx.security import SiteError
 
 _lock = threading.Lock()
@@ -295,7 +295,7 @@ def _store_script(task: dict) -> None:
 
 
 def _append_log(task: dict, status: str, detail: str) -> None:
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    stamp = beijing_text()
     line = f"{stamp} task={task['id']} name={task['name']} status={status} detail={detail}\n"
     for path in (_log_path(int(task["id"])), _tasks_log()):
         path.parent.mkdir(parents=True, exist_ok=True)

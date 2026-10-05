@@ -32,19 +32,31 @@ export function formatUptime(seconds) {
   return `${minutes} 分钟`
 }
 
+function beijingPart(date, type) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(date)
+  return parts.find((part) => part.type === type)?.value || '00'
+}
+
 export function formatDateTime(timestamp) {
   if (!timestamp) return '--'
   const date = new Date(timestamp * 1000)
   if (Number.isNaN(date.getTime())) return '--'
-  const pad = (value) => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+  return `${beijingPart(date, 'year')}-${beijingPart(date, 'month')}-${beijingPart(date, 'day')} ${beijingPart(date, 'hour')}:${beijingPart(date, 'minute')}:${beijingPart(date, 'second')}`
 }
 
 export function formatClock(timestamp) {
   const date = new Date(timestamp * 1000)
   if (Number.isNaN(date.getTime())) return ''
-  const pad = (value) => String(value).padStart(2, '0')
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+  return `${beijingPart(date, 'hour')}:${beijingPart(date, 'minute')}:${beijingPart(date, 'second')}`
 }
 
 export function usageColor(percent, normal) {
