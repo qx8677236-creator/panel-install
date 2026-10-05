@@ -408,11 +408,10 @@ class NginxSiteTests(unittest.TestCase):
             )
             self.assertIn("没有关联数据库", result["message"])
             later = self.calls[before:]
-            check_at = next(index for index, call in enumerate(later) if is_check(call))
-            remove_at = next(
-                index for index, call in enumerate(later) if APPLY_WRAPPER in call and "remove" in call
+            self.assertTrue(
+                any(APPLY_WRAPPER in call and "discard" in call for call in later)
             )
-            self.assertLess(check_at, remove_at)
+            self.assertTrue((self.layout.prefix / "nginx.conf").is_file())
             self.assertFalse((self.layout.sites_available / f"{stem}.conf").exists())
             self.assertTrue((self.layout.sites_available / "keep.local.29174.conf").is_file())
             self.assertFalse(root.exists())
@@ -432,35 +431,38 @@ class NginxSiteTests(unittest.TestCase):
             log_store.write_log = original
             backup_store.forget_site_tasks = original_forget
 
-    def test_failed_delete_check_keeps_files_and_record(self):
+    def test_failed_reload_still_drops_site_nginx_conf(self):
+        create_site("keep.local:29174", "", layout=self.layout)
         create_site("delcheck.local:29173", "", layout=self.layout)
 
         def fail_checks(argv):
             self.calls.append(list(argv))
             if is_check(argv):
                 return 1, "nginx: [emerg] forced failure"
-            return 0, "should-not-remove"
+            return 1, "reload failed"
 
         set_command_runner(fail_checks)
-        before = len(self.calls)
-        with self.assertRaises(SiteError) as caught:
-            delete_site(
-                "delcheck.local:29173",
-                True,
-                False,
-                "delcheck.local:29173",
-                "admin",
-                "127.0.0.1",
-                layout=self.layout,
-            )
-        self.assertIn("回滚", str(caught.exception))
-        self.assertEqual(caught.exception.log, "nginx: [emerg] forced failure")
-        later = self.calls[before:]
-        self.assertTrue(any(is_check(call) for call in later))
-        self.assertFalse(any(APPLY_WRAPPER in call and "remove" in call for call in later))
-        self.assertTrue((self.layout.sites_available / "delcheck.local.29173.conf").is_file())
+        result = delete_site(
+            "delcheck.local:29173",
+            False,
+            False,
+            "delcheck.local:29173",
+            "admin",
+            "127.0.0.1",
+            layout=self.layout,
+        )
+        if os.path.isfile(APPLY_WRAPPER):
+            self.assertIn("没有重载", result["message"])
+        self.assertFalse((self.layout.sites_available / "delcheck.local.29173.conf").exists())
+        self.assertFalse((self.layout.sites_enabled / "delcheck.local.29173.conf").exists())
+        self.assertFalse((self.layout.prefix / "rewrite" / "delcheck.local.29173.conf").exists())
+        self.assertTrue((self.layout.sites_available / "keep.local.29174.conf").is_file())
+        self.assertTrue((self.layout.prefix / "nginx.conf").is_file())
+        self.assertNotIn("delcheck.local:29173", (self.layout.prefix / "nginx.conf").read_text(encoding="utf-8"))
         self.assertTrue((self.root / "delcheck.local_29173").is_dir())
-        self.assertEqual(list_sites(layout=self.layout)["sites"][0]["domain"], "delcheck.local:29173")
+        names = [item["domain"] for item in list_sites(layout=self.layout)["sites"]]
+        self.assertNotIn("delcheck.local:29173", names)
+        self.assertIn("keep.local:29174", names)
 
     def test_bound_database_failure_keeps_site_record(self):
         from app.databases import service as database_service

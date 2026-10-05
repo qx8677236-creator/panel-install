@@ -155,22 +155,32 @@ def prepare_system_nginx() -> None:
     os.chmod(config, 0o644)
 
 
-def install_public_site(layout: NginxLayout, domain: str, enabled: bool) -> tuple:
-    """把这一个站点交给系统 Nginx。只新增或删除 panel- 开头的配置。"""
+def install_public_site(layout: NginxLayout, domain: str, enabled: bool, discard: bool = False) -> tuple:
+    """把这一个站点交给系统 Nginx。只新增或删除 panel- 开头的配置。
+
+    discard 只用于删除站点：卸下后不再把这份站点配置写回去。
+    """
     name = conf_stem(domain)
     if os.path.isfile(_APPLY_WRAPPER):
         if enabled:
             source = layout.sites_available / f"{name}.conf"
             argv = ["/usr/bin/sudo", "-n", _APPLY_WRAPPER, "install", name, str(source)]
         else:
-            argv = ["/usr/bin/sudo", "-n", _APPLY_WRAPPER, "remove", name]
+            action = "discard" if discard else "remove"
+            argv = ["/usr/bin/sudo", "-n", _APPLY_WRAPPER, action, name]
         return run_command(argv, timeout=20)
     if os.geteuid() != 0:
+        if not enabled and not _public_site_conf(name).exists():
+            return 0, "没有系统安装程序，该站点也没有系统配置"
         return 1, "没有找到系统 Nginx 安装程序，当前用户也不能直接写 Nginx 配置"
-    return _install_public_direct(layout, name, enabled)
+    return _install_public_direct(layout, name, enabled, discard=discard)
 
 
-def _install_public_direct(layout: NginxLayout, name: str, enabled: bool) -> tuple:
+def _public_site_conf(name: str) -> Path:
+    return _CONF_D / f"panel-{name}.conf"
+
+
+def _install_public_direct(layout: NginxLayout, name: str, enabled: bool, discard: bool = False) -> tuple:
     if not _SITE_NAME.fullmatch(name) or ".." in name:
         return 1, "站点名无效"
     prepare_system_nginx()
@@ -178,13 +188,15 @@ def _install_public_direct(layout: NginxLayout, name: str, enabled: bool) -> tup
     allowed_dir = layout.sites_available.resolve()
     if source.parent != allowed_dir:
         return 1, "只接受面板生成的站点配置"
-    dest = _CONF_D / f"panel-{name}.conf"
+    dest = _public_site_conf(name)
     if dest.parent != _CONF_D:
         return 1, "目标路径无效"
     if dest.is_symlink() or source.is_symlink():
         return 1, "目标配置是符号链接，已停止"
     backup = dest.with_name(dest.name + ".bak")
     if not enabled:
+        if discard:
+            return _discard_public_direct(dest, backup)
         return _remove_public_direct(dest, backup)
     if not source.is_file():
         return 1, "只接受面板生成的站点配置"
@@ -211,6 +223,26 @@ def _install_public_direct(layout: NginxLayout, name: str, enabled: bool) -> tup
     if backup.exists() and not backup.is_symlink():
         backup.unlink()
     return 0, output or "站点已加载到系统 Nginx"
+
+
+def _discard_public_direct(dest: Path, backup: Path) -> tuple:
+    """删掉这一个站点的系统配置，检查失败也不再写回。"""
+    if dest.is_symlink() or backup.is_symlink():
+        return 1, "目标配置是符号链接，已停止"
+    if dest.parent != _CONF_D:
+        return 1, "目标路径无效"
+    if dest.is_file():
+        dest.unlink()
+    if backup.is_file():
+        backup.unlink()
+    code, output = _system_nginx_test()
+    if code != 0:
+        return 1, output or "Nginx 配置检查失败，站点配置已删除，未重载"
+    if _nginx_master_alive():
+        code, reload_out = _system_nginx_reload()
+        if code != 0:
+            return 1, reload_out or "Nginx 重载失败，站点配置已删除"
+    return 0, output or "已从系统 Nginx 卸下该站点"
 
 
 def _remove_public_direct(dest: Path, backup: Path) -> tuple:

@@ -1718,17 +1718,14 @@ def _nginx_conf_missing(layout: NginxLayout, domain: str) -> bool:
 
 
 def _remove_nginx_for_delete(layout: NginxLayout, key: str, notes: list) -> None:
-    """配置文件已经不在时，继续往下清面板记录，避免站点卡在列表里。"""
+    """先删掉这个站点自己的 Nginx 配置，再重载。主配置文件保留。"""
     try:
-        if key == _STUCK_SITE_KEY:
-            try:
-                _retire_nginx(layout, key)
-            except SiteError:
-                _force_drop_stuck_nginx(layout, key)
-                notes.append("已按站点名清除该站点的 Nginx 配置")
-        else:
-            _retire_nginx(layout, key)
+        note = _retire_nginx(layout, key)
     except SiteError:
+        if key == _STUCK_SITE_KEY:
+            _force_drop_stuck_nginx(layout, key)
+            notes.append("已按站点名清除该站点的 Nginx 配置")
+            return
         if not _nginx_conf_missing(layout, key):
             raise
         try:
@@ -1736,6 +1733,9 @@ def _remove_nginx_for_delete(layout: NginxLayout, key: str, notes: list) -> None
         except OSError:
             logger.exception("清理本地站点配置失败")
         notes.append("Nginx 配置已经不存在，已继续清除面板记录")
+        return
+    if note:
+        notes.append(note)
 
 
 def _force_drop_stuck_nginx(layout: NginxLayout, domain: str) -> None:
@@ -1761,36 +1761,39 @@ def _force_drop_stuck_nginx(layout: NginxLayout, domain: str) -> None:
         test_main = _prepare_removal_test(layout, domain)
         code, output = nginx_test(layout, str(test_main))
         if code != 0:
-            raise SiteError("Nginx 配置检查失败，已回滚。原来的配置仍然有效。", 400, log=output or "")
-        if public.parent.is_dir() and os.geteuid() == 0:
+            logger.warning("站点 %s 的配置已删除，Nginx 检查未通过: %s", domain, output)
+        elif public.parent.is_dir() and os.geteuid() == 0:
             reload_code, reload_out = nginx_reload(layout)
             if reload_code != 0:
-                raise SiteError("系统 Nginx 没有卸下这个站点，其他服务的端口没有改动。", 400, log=reload_out or "")
-    except Exception:
-        if backup is not None and not public.exists():
-            public.write_bytes(backup)
-            os.chmod(public, 0o644)
-        raise
+                logger.warning("站点 %s 的配置已删除，Nginx 重载失败: %s", domain, reload_out)
     finally:
         _cleanup_test(layout, removed)
+        if backup is not None and public.is_file() and not public.is_symlink():
+            public.unlink()
     _drop_local_nginx(layout, domain)
 
 
-def _retire_nginx(layout: NginxLayout, domain: str) -> None:
-    """先检查去掉本站点后的候选配置。检查失败不调用安装程序，也不改正式文件。"""
+def _retire_nginx(layout: NginxLayout, domain: str) -> str:
+    """删掉这个站点自己的配置，然后重载。Nginx 主配置保留。
+
+    和宝塔删站一样：站点配置先从磁盘去掉。后面的检查失败也不再把这份配置写回去。
+    """
     _settle_host_panel_confs(layout)
-    test_main = _prepare_removal_test(layout, domain)
-    try:
-        code, output = nginx_test(layout, str(test_main))
-        if code != 0:
-            logger.warning("删除前 Nginx 检查失败，正式配置保持不变 domain=%s", domain)
-            raise SiteError("Nginx 配置检查失败，已回滚。原来的配置仍然有效。", 400, log=output or "")
-    finally:
-        _cleanup_test(layout, layout.prefix / "pending" / f"{conf_stem(domain)}.conf")
-    code, output = install_public_site(layout, domain, False)
-    if code != 0:
-        raise SiteError("系统 Nginx 没有卸下这个站点，其他服务的端口没有改动。", 400, log=output or "")
     _drop_local_nginx(layout, domain)
+    _rewrite_private_main(layout)
+    code, output = install_public_site(layout, domain, False, discard=True)
+    if code != 0:
+        logger.warning("站点 %s 的 Nginx 配置已删除，系统 Nginx 未重载: %s", domain, output)
+        return "该站点的 Nginx 配置已删除，系统 Nginx 没有重载"
+    return ""
+
+
+def _rewrite_private_main(layout: NginxLayout) -> None:
+    """面板自己的主配置只保留 include。删站后重写这一份，不删除它。"""
+    if layout.system_mode:
+        return
+    path = layout.prefix / "nginx.conf"
+    path.write_text(render_main(layout), encoding="utf-8")
 
 
 def _prepare_removal_test(layout: NginxLayout, domain: str) -> Path:

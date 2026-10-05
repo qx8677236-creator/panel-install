@@ -399,7 +399,7 @@ onMounted(reload)
           <h2 class="text-base font-medium text-[#c24141]">删除站点 {{ deleting.domain }}</h2>
           <button type="button" class="text-sm text-panel-muted" @click="closeDelete">×</button>
         </div>
-        <p class="mt-3 text-sm text-panel-muted">此操作会从面板和 Nginx 中移除该站点。请输入站点名 {{ deleting.domain }} 后才能继续。</p>
+        <p class="mt-3 text-sm text-panel-muted">此操作会删除该站点自己的 Nginx 配置，并把它从面板列表里去掉。Nginx 主配置会保留。网站目录和数据库只有勾选后才会删除。请输入站点名 {{ deleting.domain }} 后才能继续。</p>
         <label class="mt-4 flex items-start gap-2 text-sm">
           <input v-model="deleteFiles" type="checkbox" class="mt-1" />
           <span>勾选此项，将同步永久删除网站根目录文件（不可逆）</span>
