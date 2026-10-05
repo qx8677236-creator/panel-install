@@ -43,6 +43,24 @@ fi
 rm -rf "$INSTALL_DIR" || die "删除 ${INSTALL_DIR} 失败。"
 rm -rf /www/wwwroot /www/backup /www/server/data || die "删除 /www 下的面板数据失败。"
 
+echo "[2/4] 正在清理面板写入的 Nginx 站点配置..."
+removed=0
+if [ -d /etc/nginx/conf.d ] && [ ! -L /etc/nginx/conf.d ]; then
+    for file in /etc/nginx/conf.d/panel-*.conf /etc/nginx/conf.d/panel-*.conf.bak; do
+        if [ -f "$file" ] && [ ! -L "$file" ]; then
+            rm -f "$file"
+            removed=$((removed + 1))
+        fi
+    done
+fi
+if command -v nginx >/dev/null 2>&1 && nginx -t >/dev/null 2>&1; then
+    if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nginx; then
+        systemctl reload nginx >/dev/null 2>&1 || true
+    else
+        nginx -s reload >/dev/null 2>&1 || true
+    fi
+fi
+
 echo
 echo "============================================================"
 echo "  面板已卸载"
@@ -51,6 +69,7 @@ echo "  /www/wwwroot"
 echo "  /www/backup"
 echo "  /www/server/data"
 echo "  /opt/panel-assistant"
-echo "  Docker 程序本身和 /etc/nginx 未删除。"
+echo "  /etc/nginx/conf.d/panel-*.conf（本次 ${removed} 个）"
+echo "  其他 Nginx 配置、Docker 程序本身未删除。"
 echo "============================================================"
 echo
