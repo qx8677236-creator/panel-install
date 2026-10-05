@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    image: ${PANEL_BACKEND_IMAGE:-panel-assistant-backend:latest}
+    network_mode: host
+    privileged: true
+    restart: unless-stopped
+    environment:
+      FILE_ROOT: /www/wwwroot
+      NGINX_SYSTEM_MODE: "true"
+    volumes:
+      - /etc/nginx:/etc/nginx
+      - /www:/www
+      - /var/run/docker.sock:/var/run/docker.sock
+      - panel-data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+    image: ${PANEL_FRONTEND_IMAGE:-panel-assistant-frontend:latest}
+    network_mode: host
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  panel-data:

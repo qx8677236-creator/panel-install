@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>删库跑路快捷助手 · 官方使用文档</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Noto Sans SC", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+            mono: ["IBM Plex Mono", "ui-monospace", "monospace"]
+          },
+          colors: {
+            ink: "#07111f",
+            brand: "#12315c",
+            line: "#d7e0ea"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .nav-link.active { background: rgba(255,255,255,.08); color: #fff; }
+    pre { white-space: pre-wrap; word-break: break-word; }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+  <header class="sticky top-0 z-30 flex items-center justify-between border-b border-white/10 bg-ink px-4 py-3 text-white lg:hidden">
+    <div>
+      <div class="text-sm font-bold tracking-wide">删库跑路快捷助手</div>
+      <div class="text-xs text-slate-300">官方使用文档</div>
+    </div>
+    <button id="menu-toggle" type="button" class="rounded border border-white/20 px-3 py-1 text-sm">目录</button>
+  </header>
+
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full overflow-y-auto bg-ink text-slate-300 transition lg:translate-x-0">
+    <div class="border-b border-white/10 px-6 py-6">
+      <div class="text-xs uppercase tracking-[0.18em] text-sky-300">Official Docs</div>
+      <div class="mt-2 text-xl font-bold text-white">删库跑路快捷助手</div>
+      <div class="mt-1 text-sm text-slate-400">官方使用文档</div>
+    </div>
+    <nav class="space-y-1 px-3 py-4 text-sm" id="side-nav">
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#intro">1. 产品简介</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#require">2. 安装前准备</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#install">3. 一键安装指南</a>
+      <a class="nav-link block rounded px-3 py-2 text-red-300 hover:bg-white/5 hover:text-white" href="#uninstall">面板一键彻底卸载</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#behavior">安装脚本实际做了什么</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#success">安装成功后的终端</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#sites">4.1 网站管理</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#database">4.2 数据库管理</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#files">4.3 文件管理器</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#backup">4.4 定时备份</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#logs">4.5 日志审计</a>
+      <a class="nav-link block rounded px-3 py-2 hover:bg-white/5 hover:text-white" href="#faq">5. 故障排查</a>
+    </nav>
+  </aside>
+  <div id="backdrop" class="fixed inset-0 z-30 hidden bg-slate-900/50 lg:hidden"></div>
+
+  <main class="lg:pl-72">
+    <section class="bg-brand text-white">
+      <div class="mx-auto max-w-4xl px-6 py-16 lg:px-10">
+        <p class="text-sm text-sky-200">Docker 隔离 · 宿主机管理 · 单命令交付</p>
+        <h1 class="mt-3 text-4xl font-bold leading-tight">删库跑路快捷助手</h1>
+        <p class="mt-4 max-w-2xl text-base leading-7 text-sky-100">面向 Linux 服务器的轻量运维面板。网站、数据库、文件、备份和日志集中在一个入口。新机器不需要编译源码，一条命令从 Docker Hub 拉起整套服务。</p>
+        <div class="mt-8 grid gap-3 sm:grid-cols-3">
+          <div class="rounded border border-white/15 bg-white/5 px-4 py-3">
+            <div class="text-xs text-sky-200">访问端口</div>
+            <div class="mt-1 text-lg font-semibold">8888</div>
+          </div>
+          <div class="rounded border border-white/15 bg-white/5 px-4 py-3">
+            <div class="text-xs text-sky-200">初始用户</div>
+            <div class="mt-1 text-lg font-semibold">admin</div>
+          </div>
+          <div class="rounded border border-white/15 bg-white/5 px-4 py-3">
+            <div class="text-xs text-sky-200">镜像仓库</div>
+            <div class="mt-1 text-lg font-semibold">Docker Hub</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <article class="mx-auto max-w-4xl space-y-16 px-6 py-12 lg:px-10">
+      <section id="intro" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">1. 产品简介</h2>
+        <p class="mt-4 leading-8">删库跑路快捷助手是一套面向单机 Linux 的运维面板。它把网站虚拟主机、MySQL 数据库、文件浏览、定时备份和操作日志放在同一个 Web 界面里，日常操作不再依赖反复登录 SSH 手工敲命令。</p>
+        <p class="mt-4 leading-8">面板本身跑在 Docker 容器中。前端页面和后端接口分成两个镜像：浏览器只访问 8888 端口上的 Nginx，接口由本机 8000 端口上的后端提供，并不对公网单独暴露。网站文件放在宿主机的 /www/wwwroot，备份放在 /www/backup，数据库数据放在 /www/server/data。面板自己的账本、密钥和管理员哈希放在独立的数据卷里，不会写进镜像。</p>
+        <p class="mt-4 leading-8">为了能管理宿主机上的 Nginx、网站目录和 Docker，后端容器使用宿主机网络，并以特权方式运行，同时挂载 /etc/nginx、/www 和 Docker 套接字。这意味着面板具备管理这台机器的能力。请只把它安装在你自己拥有的服务器上，安装完成后立刻登录并修改管理员密码。</p>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <div class="rounded border border-line bg-white p-5">
+            <h3 class="font-semibold text-brand">容器负责运行面板</h3>
+            <p class="mt-2 text-sm leading-7 text-slate-600">页面和接口随镜像交付。换一台机器时不需要在目标机上安装 Node.js 或 Python 开发环境，Docker 由安装脚本补齐。</p>
+          </div>
+          <div class="rounded border border-line bg-white p-5">
+            <h3 class="font-semibold text-brand">网站数据留在宿主机</h3>
+            <p class="mt-2 text-sm leading-7 text-slate-600">站点根目录、备份和数据库文件在 /www 下面。卸载容器不会自动删掉这些业务目录，便于单独迁移和打包。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="require" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">2. 安装前准备</h2>
+        <p class="mt-4 leading-8">安装脚本用 root 身份运行。它会识别系统家族，安装 Docker Engine 和 Compose 插件，再拉取已经公开的镜像。开始之前请确认机器是一台干净的 Linux 服务器，而不是已经占用 8000 或 8888 端口的环境。</p>
+        <h3 class="mt-8 text-lg font-semibold text-brand">支持的操作系统</h3>
+        <div class="mt-4 overflow-hidden rounded border border-line bg-white">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-100 text-slate-600">
+              <tr>
+                <th class="px-4 py-3 font-medium">系统</th>
+                <th class="px-4 py-3 font-medium">版本</th>
+                <th class="px-4 py-3 font-medium">安装路径</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              <tr>
+                <td class="px-4 py-3">Ubuntu</td>
+                <td class="px-4 py-3">20.04 及更新的 LTS</td>
+                <td class="px-4 py-3">apt 安装 Docker 官方源</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3">Debian</td>
+                <td class="px-4 py-3">11 及更新版本</td>
+                <td class="px-4 py-3">apt 安装 Docker 官方源</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3">CentOS / CentOS Stream</td>
+                <td class="px-4 py-3">7 及后续 Stream 版本</td>
+                <td class="px-4 py-3">dnf 或 yum 安装 Docker</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3">RHEL、Rocky Linux、AlmaLinux、Fedora</td>
+                <td class="px-4 py-3">与 CentOS 相同的 RPM 路径</td>
+                <td class="px-4 py-3">脚本按系统 ID 自动选择</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-4 text-sm leading-7 text-slate-600">脚本读到无法识别的系统 ID 时会直接退出，不会继续改软件源。CentOS 7 的官方 Docker 仓库若已停止提供安装包，安装会在拉取软件包这一步失败并退出，不会显示安装成功。</p>
+
+        <h3 class="mt-8 text-lg font-semibold text-brand">硬件与网络</h3>
+        <ul class="mt-4 space-y-3 leading-7">
+          <li class="rounded border border-line bg-white px-4 py-3">处理器至少 1 核。同时跑面板和多个数据库容器时，建议 2 核以上。</li>
+          <li class="rounded border border-line bg-white px-4 py-3">内存至少 1GB。建议 2GB 以上，否则 MySQL 与面板同时运行时容易因为内存不足被系统杀掉。</li>
+          <li class="rounded border border-line bg-white px-4 py-3">磁盘需要能写下 Docker 镜像、网站文件和备份。备份保留份数请在面板里设置，避免把磁盘写满。</li>
+          <li class="rounded border border-line bg-white px-4 py-3">云厂商安全组和本机防火墙需要放行 TCP 8888。这是浏览器访问面板的端口。后端接口监听在本机 127.0.0.1:8000，不需要单独对公网放行。</li>
+          <li class="rounded border border-line bg-white px-4 py-3">机器必须能访问 Docker Hub、GitHub Raw，以及安装 Docker 时使用的 download.docker.com。完全离线的机器不能使用这条一键命令。</li>
+        </ul>
+      </section>
+
+      <section id="install" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">3. 一键安装指南</h2>
+        <p class="mt-4 leading-8">使用 root 登录新服务器，或者先切换到 root。下面这一条命令会下载公开仓库里的 install.sh，然后立刻执行。命令中的地址是 GitHub Raw 节点，对应仓库 qx8677236-creator/panel-install 的 main 分支。</p>
+        <div class="mt-5 overflow-hidden rounded-lg bg-slate-950 text-slate-100 shadow-sm">
+          <div class="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-slate-400">
+            <span>新服务器 · root</span>
+            <button type="button" class="copy-btn rounded bg-white/10 px-2 py-1 text-slate-100 hover:bg-white/20" data-target="cmd-install">复制</button>
+          </div>
+          <pre class="px-4 py-4 font-mono text-sm leading-7"><code id="cmd-install">wget -O install.sh https://raw.githubusercontent.com/qx8677236-creator/panel-install/main/install.sh && sudo bash install.sh</code></pre>
+        </div>
+        <p class="mt-4 leading-8">如果当前终端已经是 root，sudo 仍然可以执行。脚本会再次检查自己是否以 root 运行，普通用户直接 bash install.sh 会被拒绝。</p>
+        <p class="mt-4 leading-8">8000 或 8888 已被占用时，脚本在安装 Docker 之前就退出，并提示停止安装。已经跑着其他面板或本机开发服务的机器不要执行这条命令。容器启动后，脚本会每秒访问一次 http://127.0.0.1:8000/api/health，直到返回 200 才读取初始密码。60 秒内没有就绪就中止，不会打印一份还不能登录的成功提示。</p>
+      </section>
+
+      <section id="uninstall" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-red-700">面板一键彻底卸载指南</h2>
+        <p class="mt-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-base font-semibold leading-8 text-red-700">此操作将永久清空服务器上的所有网站文件、数据库容器及面板本地数据，不可逆转，请谨慎操作。</p>
+        <p class="mt-4 leading-8">在要卸载的那台新装机器上执行下面的命令。脚本会先停掉 /opt/panel-assistant 里的容器，删除面板镜像和数据卷，再删除 /www/wwwroot、/www/backup、/www/server/data 和 /opt/panel-assistant。它不会卸载 Docker 程序，也不会删除 /etc/nginx。执行后终端会要求输入“确认卸载”，输入不一致就停止。</p>
+        <div class="mt-5 overflow-hidden rounded-lg border border-red-400 bg-slate-950 text-slate-100">
+          <div class="flex items-center justify-between border-b border-red-400/40 px-4 py-2 text-xs text-red-200">
+            <span>卸载 · 不可恢复</span>
+            <button type="button" class="copy-btn rounded bg-red-500/20 px-2 py-1 text-red-100 hover:bg-red-500/30" data-target="cmd-uninstall">复制</button>
+          </div>
+          <pre class="px-4 py-4 font-mono text-sm leading-7"><code id="cmd-uninstall">wget -O uninstall.sh https://raw.githubusercontent.com/qx8677236-creator/panel-install/main/uninstall.sh && sudo bash uninstall.sh</code></pre>
+        </div>
+        <p class="mt-4 leading-8 text-red-700">已经用 systemd 运行面板的机器会被脚本拒绝，避免误删正在使用的站点。卸载命令生效前，需要把本仓库里的 uninstall.sh 上传到 GitHub 仓库 panel-install 的 main 分支根目录。</p>
+      </section>
+
+      <section id="behavior" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">安装脚本实际做了什么</h2>
+        <p class="mt-4 leading-8">脚本没有交互提问。任何关键步骤失败都会打印原因并退出，不会在半途失败后仍提示安装成功。完整顺序如下。</p>
+        <ol class="mt-6 space-y-4">
+          <li class="rounded border border-line bg-white p-4 leading-7"><span class="font-semibold text-brand">检查身份和端口。</span> 必须是 root。若 8000 或 8888 已有进程监听，立即退出。</li>
+          <li class="rounded border border-line bg-white p-4 leading-7"><span class="font-semibold text-brand">识别系统并安装 Docker。</span> Ubuntu 与 Debian 走 apt 官方源。CentOS、RHEL、Rocky Linux、AlmaLinux 和 Fedora 走 RPM 源。已经具备 docker compose 插件时跳过安装。</li>
+          <li class="rounded border border-line bg-white p-4 leading-7"><span class="font-semibold text-brand">创建宿主机目录。</span> 创建 /www/wwwroot、/www/backup、/www/server/data，以及编排目录 /opt/panel-assistant。</li>
+          <li class="rounded border border-line bg-white p-4 leading-7"><span class="font-semibold text-brand">写入编排文件并拉取镜像。</span> 镜像固定为 xiaoqiang001/panel-backend:1.0 与 xiaoqiang001/panel-frontend:1.0。两个仓库都需要保持 Public，否则新机器无法匿名拉取。</li>
+          <li class="rounded border border-line bg-white p-4 leading-7"><span class="font-semibold text-brand">启动两个容器。</span> 后端使用特权模式和宿主机网络，挂载 /etc/nginx、/www、Docker 套接字，以及名为 panel-data 的数据卷。前端 Nginx 监听 8888，把 /api 和 /ws 转到本机 8000。</li>
+          <li class="rounded border border-line bg-white p-4 leading-7"><span class="font-semibold text-brand">等待接口就绪后再读取密码。</span> 每秒请求一次本机 8000 端口的 /api/health。返回 200 之后，才从容器日志取出首次生成的管理员密码。密码在磁盘上只保存 bcrypt 哈希。内网地址来自 hostname -I 的第一项，公网地址来自 api64.ipify.org 或 ifconfig.me。公网查询失败时，提示改用你自己的服务器公网 IP。登录请打开公网地址的 8888 端口。</li>
+        </ol>
+      </section>
+
+      <section id="success" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">安装成功后的终端</h2>
+        <p class="mt-4 leading-8">安装开始后，终端会要求输入面板初始管理员密码，直接回车会被拒绝。这个密码会交给后端，在第一次创建管理员时做成哈希保存，不会再自动生成另一套密码。下面是结束时的版式示例，公网地址以实际抓取结果为准。</p>
+        <div class="mt-5 overflow-hidden rounded-lg bg-slate-950 text-emerald-300">
+          <div class="border-b border-white/10 px-4 py-2 text-xs text-slate-400">终端输出示例</div>
+          <pre class="px-4 py-5 font-mono text-sm leading-7 text-emerald-200">============================================================
+  面板安装完成
+  面板公网访问地址: http://203.0.113.10:8888
+  面板内网访问地址: http://10.0.0.8:8888
+  初始账号: admin
+  初始密码: 你在安装时输入的密码
+============================================================</pre>
+        </div>
+        <p class="mt-4 leading-8">用浏览器打开公网访问地址，端口是 8888。使用 admin 和这一次打印的密码登录。不要改用安装框里的内网地址，也不要改用 8000 端口，否则登录请求到不了面板接口，页面会提示无法连接。登录后请立刻修改管理员密码。如果输出写的是“数据卷里已有管理员，本次没有生成新密码”，说明这台机器以前安装过，应使用当时的密码，而不是示例里的字符串。</p>
+      </section>
+
+      <section id="sites" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">4.1 网站管理</h2>
+        <p class="mt-4 leading-8">登录后打开网站列表。添加站点时填写域名。根目录可以留空，面板会在文件根目录 /www/wwwroot 下按域名创建目录。保存前会先做 Nginx 配置检查，检查失败不会覆盖正在使用的正式配置。</p>
+        <h3 class="mt-6 font-semibold text-brand">反向代理</h3>
+        <p class="mt-3 leading-8">在站点设置中填写代理路径和上游地址，例如把 /api 转到另一台内网服务。提交成功后，页面会重新向服务器拉取这份站点配置，而不是只改浏览器里的旧数据。刷新页面后看到的路径和上游地址，就是已经写入配置的内容。</p>
+        <h3 class="mt-6 font-semibold text-brand">彻底删除站点</h3>
+        <p class="mt-3 leading-8">网站列表每一行都有删除按钮。点击后先弹出确认框，遮罩层上的点击不会把窗口关掉。窗口里有两个默认不选的选项：是否同时删除网站根目录，是否同时删除该站点明确绑定的数据库。确认按钮在你输入的文字和站点键完全一致之前保持禁用。站点键就是列表里显示的那一串。使用 80 以外端口的站点，键里包含端口，必须连端口一起输入。</p>
+        <p class="mt-3 leading-8">确认通过后，后端按这个顺序处理：先生成一份去掉该站点的候选 Nginx 配置并执行 nginx 检查；检查失败则恢复原配置，不删除文件，也不删面板记录。检查通过后才移除该站点配置并重载。若勾选了删除文件，只删除文件根目录里面的该站点目录，拒绝空路径、根目录、/etc 以及逃出文件根的路径。日志只删除属于这个站点的访问日志和错误日志。只有站点记录里明确写了绑定数据库时，才会删除那个库。最后从面板站点库删除记录，并写一条操作日志。</p>
+      </section>
+
+      <section id="database" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">4.2 数据库管理</h2>
+        <p class="mt-4 leading-8">数据库页按引擎分了标签：MySQL、SQL Server、MongoDB、Redis、PgSQL 和 SQLite。进入页面或切换标签时，都会重新请求接口，不使用浏览器里的旧列表。MySQL 上方是用户权限，下方表格才是业务库账本，列包括数据库名、用户名、密码状态、权限和操作。</p>
+        <h3 class="mt-6 font-semibold text-brand">创建库和用户</h3>
+        <p class="mt-3 leading-8">点击添加数据库，填写数据库名、用户名、密码和主机。主机可以是 localhost、具体 IP，或一个百分号表示任意主机。密码至少 8 位，必须同时包含大写字母、小写字母、数字和特殊字符，不能包含单引号、双引号、分号或空白。</p>
+        <p class="mt-3 leading-8">如果这个用户已经在 MySQL 里存在，创建不会中断。面板会刷新权限，使用 IF NOT EXISTS 创建用户，再用 ALTER USER 把密码更新成你这次填写的新密码，然后创建同名数据库（已存在则继续），并把该库的全部权限授给这个用户。SQL 成功后，把绑定写入面板本地 SQLite 账本。密码以加密形式保存。列表里的密码字段是空的，只用“已设置”或“未设置”表示状态。</p>
+        <h3 class="mt-6 font-semibold text-brand">改密、备份、恢复和删除</h3>
+        <ul class="mt-3 space-y-3 leading-7">
+          <li class="rounded border border-line bg-white px-4 py-3">改密：在该行点击改密，输入符合强度规则的新密码。成功后同时更新 MySQL 用户和账本里的加密记录。</li>
+          <li class="rounded border border-line bg-white px-4 py-3">备份：只导出这一行对应的库。导出在后台单独执行，同时只允许一个打包或还原任务，避免占满磁盘。完成后在面板里下载，下载需要登录状态，没有公开直链。</li>
+          <li class="rounded border border-line bg-white px-4 py-3">恢复：只列出这个库自己的备份文件。文件必须位于备份目录内，并且文件名属于这个库。</li>
+          <li class="rounded border border-line bg-white px-4 py-3">删除：必须手动输入数据库名，确认按钮才会可用。确认后删除 MySQL 中的库和账本中的这一行。只有没有其他库还使用这个用户时，才会删除该用户。不会删除 root，也不会删除 mysql、information_schema、performance_schema、sys 这些系统库。</li>
+        </ul>
+        <h3 class="mt-6 font-semibold text-brand">一键安装数据库引擎</h3>
+        <p class="mt-3 leading-8">安装 MySQL、Redis、MongoDB、PgSQL 或 SQL Server 之前，必须先在弹窗里手工输入 root 密码。密码规则与上面相同。不合规时安装按钮保持禁用。后端在启动容器之前也会拒绝空密码和弱密码。容器确认启动之后，才把这个密码加密写入该引擎的密钥文件。面板不会再自动生成一个你看不见的安装口令。</p>
+        <p class="mt-3 leading-8">MySQL 页面上的 root密码 按钮打开的是当前已保存的 root 口令。它只对已经登录的管理员显示，不会出现在数据库列表接口里。</p>
+      </section>
+
+      <section id="files" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">4.3 文件管理器</h2>
+        <p class="mt-4 leading-8">文件管理器限制在文件根目录之内。Docker 安装后的文件根目录是 /www/wwwroot。地址栏可以输入绝对路径并跳转，但后端会把路径解析后再判断：空路径、根目录 /、/etc、/root、带有上一级跳转并逃出文件根的路径、以及指向文件根以外的符号链接，都会被拒绝。</p>
+        <p class="mt-4 leading-8">打开目录、刷新、返回上一级时，如果上一次列表请求还没回来，前端会用 AbortController 取消它，只保留最后一次。读取过程中相关按钮会禁用，并显示正在读取。大目录或网络慢时连续点击，被取消的那一次不会当成故障弹窗。压缩和解压放在后台执行，不在处理网页请求的线程里直接打包。</p>
+      </section>
+
+      <section id="backup" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">4.4 定时备份</h2>
+        <p class="mt-4 leading-8">计划任务页可以添加网站备份和数据库备份。网站备份把站点目录打成压缩包，放到 /www/backup/site。数据库备份把导出结果放到 /www/backup/database。每条任务选择保留份数，范围是 1 到 30。新的备份完成后，只清理这一条任务自己的旧文件，不删除别的任务或其他目录里的文件。</p>
+        <p class="mt-4 leading-8">定时表达式按北京时间计算。打包在独立进程池里执行，进程池同时只跑一个任务，并且有全局文件锁。第二个任务到来时会记一条“已有打包任务在执行，本次跳过”，然后返回，不会把磁盘读写打满导致面板和网站一起失去响应。立刻执行也走同一条队列，不会堵在网页请求里。</p>
+        <p class="mt-4 leading-8">删除一条备份任务会删掉面板里的任务记录和它的执行日志，默认不连带删除已经生成的压缩包。若要释放磁盘，请在确认保留份数之后再手工清理不再需要的归档，或把保留份数调小并再执行一次，让清理逻辑去掉超出的旧文件。</p>
+      </section>
+
+      <section id="logs" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">4.5 日志审计</h2>
+        <p class="mt-4 leading-8">日志中心按类型分页签，包括面板操作、登录、运行、任务、网站、审计、SSH 和软件安装。切换页签时会取消上一个还没完成的请求，刷新按钮在读取期间保持禁用。被取消的请求不会显示成“读取日志失败”。</p>
+        <p class="mt-4 leading-8">操作日志记录谁在面板里做了哪些变更，例如彻底删除某个站点。网站日志只针对该站点自己的访问日志和错误日志。SSH 页签用于查看登录失败和审计记录，便于发现口令尝试。它展示的是记录，不会自动修改 SSH 端口，也不会关闭密码登录。</p>
+        <p class="mt-4 leading-8">未处理的程序异常只会在页面上显示“服务器内部错误”。Python 堆栈、物理路径、数据库驱动原文和 GRANT 语句不会返回给浏览器，详细原因写在服务器日志里。</p>
+      </section>
+
+      <section id="faq" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-ink">5. 常见问题与运维故障排查</h2>
+
+        <div class="mt-6 space-y-6">
+          <div class="rounded border border-line bg-white p-5">
+            <h3 class="text-lg font-semibold text-brand">忘记了 MySQL root 密码怎么办？</h3>
+            <p class="mt-3 leading-8">先登录面板，打开数据库，选择 MySQL，点击 root密码。这个窗口会读取已经加密保存在服务器上的 root 口令，并显示给当前管理员。安装数据库时填写的密码，以及后来在这个窗口里修改成功的密码，都在这里。</p>
+            <p class="mt-3 leading-8">如果窗口显示尚未保存，或者用显示出来的密码仍然无法连接，再使用紧急脚本。脚本在源码的 backend/reset_mysql_password.py。不带参数运行时，它只检查已保存的密码能不能登录，能登录就直接结束，不会重启数据库，也不会进入免密模式。</p>
+            <div class="mt-4 overflow-hidden rounded-lg bg-slate-950 text-slate-100">
+              <div class="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-slate-400">
+                <span>只检查，不改密码</span>
+                <button type="button" class="copy-btn rounded bg-white/10 px-2 py-1 hover:bg-white/20" data-target="cmd-reset-check">复制</button>
+              </div>
+              <pre class="px-4 py-4 font-mono text-sm leading-7"><code id="cmd-reset-check">cd /opt/panel-assistant
+docker compose exec backend python3 reset_mysql_password.py</code></pre>
+            </div>
+            <p class="mt-4 leading-8">只有确认旧密码已经无法登录时，才传入新密码。新密码必须满足安装时的强度规则。脚本拒绝过于常见的弱密码。重置成功后会把新密码加密写回原来的密钥文件，并保证不会把数据库留在免密启动状态。</p>
+            <div class="mt-4 overflow-hidden rounded-lg bg-slate-950 text-slate-100">
+              <div class="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-slate-400">
+                <span>确认无法登录之后才执行</span>
+                <button type="button" class="copy-btn rounded bg-white/10 px-2 py-1 hover:bg-white/20" data-target="cmd-reset-apply">复制</button>
+              </div>
+              <pre class="px-4 py-4 font-mono text-sm leading-7"><code id="cmd-reset-apply">cd /opt/panel-assistant
+docker compose exec backend python3 reset_mysql_password.py --password 'Aa1!更换成你的强密码'</code></pre>
+            </div>
+            <p class="mt-4 leading-8">Docker 镜像打包的是应用目录。如果容器里提示找不到 reset_mysql_password.py，不要反复重启数据库。请改用面板里的 root密码窗口。那个窗口读取的就是容器数据卷中的加密密钥，不依赖这支脚本是否打进镜像。</p>
+          </div>
+
+          <div class="rounded border border-line bg-white p-5">
+            <h3 class="text-lg font-semibold text-brand">连续点击目录后提示请求已取消，是故障吗？</h3>
+            <p class="mt-3 leading-8">不是故障。文件管理器和日志中心在发起新请求之前，会取消还没返回的上一次请求。目录很大、磁盘忙或者你点得很快时，先发出去的那一次会被浏览器标记为已取消。页面只展示最后一次请求的结果，并在读取期间把按钮禁用。这样可以避免旧请求晚到之后把新目录的内容覆盖掉，也可以避免请求在后台越积越多，把面板点到没有响应。</p>
+            <p class="mt-3 leading-8">如果最后一次请求也失败，并且提示的不是取消，而是读取失败或未登录，再检查网络、登录是否过期，以及当前路径是不是还在 /www/wwwroot 里面。</p>
+          </div>
+
+          <div class="rounded border border-line bg-white p-5">
+            <h3 class="text-lg font-semibold text-brand">刚建的数据库，下面的表格是空的？</h3>
+            <p class="mt-3 leading-8">下方表格读的是面板自己的 SQLite 账本，不是 MySQL 里全部账号的实时清单。上方“用户权限”列出的是 MySQL 系统账号，例如 root 和 mysql.sys，那些行不会出现在下方业务库表格里。系统库 mysql、information_schema、performance_schema 和 sys 也不会被收进账本。</p>
+            <p class="mt-3 leading-8">添加数据库成功后，页面会重新请求列表。一行业务库至少要有数据库名。密码列显示已设置或未设置，不会显示明文。若创建接口返回了错误，表格不会出现新行，请根据页面上的短句提示修改用户名、库名或密码后重试。用户名已经存在并不是错误，只要密码符合规则，面板会更新密码、继续建库并授权，然后写入账本。</p>
+            <p class="mt-3 leading-8">可以在服务器上确认账本文件是否存在。它位于面板数据卷中的 mysql 目录，文件名是 panel_databases.sqlite，权限应为仅所有者可读写。不要手工改这个文件里的密码字段，那里保存的是密文。列表仍然为空时，先切换一次数据库标签，强迫页面重新拉取。若拉取结果里没有这项业务库，说明创建请求没有成功写入账本，需要重新提交一次创建，而不是只在 MySQL 命令行里建库。</p>
+          </div>
+
+          <div class="rounded border border-line bg-white p-5">
+            <h3 class="text-lg font-semibold text-brand">一键安装拉取镜像失败</h3>
+            <p class="mt-3 leading-8">确认两个仓库都是 Public：xiaoqiang001/panel-backend 和 xiaoqiang001/panel-frontend，并且存在标签 1.0。新服务器要能访问 Docker Hub。若 8000 或 8888 被占用，脚本不会开始拉取。把占用端口的程序停掉，或换一台端口空闲的机器，再执行同一条安装命令。</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="border-t border-line pt-8 text-sm leading-7 text-slate-500">
+        <p>删库跑路快捷助手官方使用文档。安装仓库为 https://github.com/qx8677236-creator/panel-install 。面板入口端口为 8888，初始用户名为 admin，初始密码以安装结束时终端打印的那一次为准。</p>
+      </footer>
+    </article>
+  </main>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const backdrop = document.getElementById("backdrop");
+    const toggle = document.getElementById("menu-toggle");
+
+    function closeMenu() {
+      sidebar.classList.add("-translate-x-full");
+      backdrop.classList.add("hidden");
+    }
+
+    function openMenu() {
+      sidebar.classList.remove("-translate-x-full");
+      backdrop.classList.remove("hidden");
+    }
+
+    toggle.addEventListener("click", function () {
+      if (sidebar.classList.contains("-translate-x-full")) {
+        openMenu();
+      } else {
+        closeMenu();
+      }
+    });
+    backdrop.addEventListener("click", closeMenu);
+
+    document.querySelectorAll("#side-nav a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        if (window.innerWidth < 1024) {
+          closeMenu();
+        }
+      });
+    });
+
+    const sections = Array.from(document.querySelectorAll("main section[id]"));
+    const links = Array.from(document.querySelectorAll("#side-nav a"));
+
+    function markCurrent() {
+      let current = sections[0];
+      sections.forEach(function (section) {
+        const top = section.getBoundingClientRect().top;
+        if (top < 140) {
+          current = section;
+        }
+      });
+      links.forEach(function (link) {
+        link.classList.toggle("active", link.getAttribute("href") === "#" + current.id);
+      });
+    }
+
+    document.addEventListener("scroll", markCurrent, { passive: true });
+    markCurrent();
+
+    document.querySelectorAll(".copy-btn").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const node = document.getElementById(button.getAttribute("data-target"));
+        const text = node.innerText;
+        const done = function () {
+          const original = button.textContent;
+          button.textContent = "已复制";
+          window.setTimeout(function () {
+            button.textContent = original;
+          }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done);
+          return;
+        }
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        done();
+      });
+    });
+  </script>
+</body>
+</html>
