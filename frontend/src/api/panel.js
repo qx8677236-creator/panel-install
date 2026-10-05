@@ -11,6 +11,10 @@ export function savePanelTitle(title) {
   return http.post('/api/panel/title', { title })
 }
 
+export function saveAllowIps(allow_ips) {
+  return http.post('/api/panel/allow-ips', { allow_ips })
+}
+
 export function changePanelPassword(old_password, new_password) {
   return http.post('/api/panel/password', { old_password, new_password })
 }

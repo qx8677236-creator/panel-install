@@ -47,6 +47,14 @@ async function onLogout() {
           首页
         </router-link>
         <router-link
+          :to="{ name: 'sites' }"
+          class="mt-1 flex items-center gap-2 rounded px-3 py-2.5 text-sm text-white/70 hover:bg-white/[0.04] hover:text-white"
+          exact-active-class="!bg-white/10 !text-white shadow-[inset_3px_0_0_#20a53a]"
+        >
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-white/40"></span>
+          网站
+        </router-link>
+        <router-link
           :to="{ name: 'files' }"
           class="mt-1 flex items-center gap-2 rounded px-3 py-2.5 text-sm text-white/70 hover:bg-white/[0.04] hover:text-white"
           exact-active-class="!bg-white/10 !text-white shadow-[inset_3px_0_0_#20a53a]"
@@ -101,14 +109,6 @@ async function onLogout() {
         >
           <span class="inline-block h-1.5 w-1.5 rounded-full bg-white/40"></span>
           面板设置
-        </router-link>
-        <router-link
-          :to="{ name: 'sites' }"
-          class="mt-1 flex items-center gap-2 rounded px-3 py-2.5 text-sm text-white/70 hover:bg-white/[0.04] hover:text-white"
-          exact-active-class="!bg-white/10 !text-white shadow-[inset_3px_0_0_#20a53a]"
-        >
-          <span class="inline-block h-1.5 w-1.5 rounded-full bg-white/40"></span>
-          网站
         </router-link>
       </nav>
       <div class="border-t border-white/10 px-4 py-3 text-[11px] text-white/35">v0.4 · 定时备份</div>

@@ -20,6 +20,7 @@ from app.auth.store import create_admin_if_needed
 from app.config import settings
 from app.files.router import router as files_router
 from app.files.security import ensure_file_root
+from app.middleware.allowlist import IpAllowMiddleware
 from app.middleware.security import SecurityHeadersMiddleware
 from app.monitor.collector import metrics_loop
 from app.monitor.router import router as monitor_router
@@ -92,6 +93,7 @@ app = FastAPI(
 app.add_exception_handler(Exception, unhandled_exception)
 
 # 后添加的中间件在最外层。CORS 放最外，预检失败时也能带上来源头。
+app.add_middleware(IpAllowMiddleware)
 app.add_middleware(OperationLogMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(

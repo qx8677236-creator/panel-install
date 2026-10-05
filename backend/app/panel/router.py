@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import anyio
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.auth.deps import current_user
@@ -31,6 +31,26 @@ class TerminalIn(BaseModel):
     ai_shell: bool = False
 
 
+class AllowIpsIn(BaseModel):
+    allow_ips: str = Field(default="", max_length=2000)
+
+
+def _client_ip(request: Request) -> str:
+    if request.client is None:
+        return ""
+    return request.client.host or ""
+
+
+def _with_client(data: dict, request: Request) -> dict:
+    shown = dict(data)
+    host = _client_ip(request)
+    try:
+        shown["client_ip"] = settings.normalize_ip(host) if host else ""
+    except SiteError:
+        shown["client_ip"] = ""
+    return shown
+
+
 async def _run(func):
     try:
         return await anyio.to_thread.run_sync(func)
@@ -39,13 +59,20 @@ async def _run(func):
 
 
 @router.get("/settings")
-async def get_settings() -> dict:
-    return await _run(settings.panel_settings)
+async def get_settings(request: Request) -> dict:
+    data = await _run(settings.panel_settings)
+    return _with_client(data, request)
 
 
 @router.post("/title")
 async def save_title(body: TitleIn) -> dict:
     return await _run(lambda: settings.save_title(body.title))
+
+
+@router.post("/allow-ips")
+async def save_allow_ips(body: AllowIpsIn, request: Request) -> dict:
+    data = await _run(lambda: settings.save_allow_ips(body.allow_ips, _client_ip(request)))
+    return _with_client(data, request)
 
 
 @router.post("/password")
