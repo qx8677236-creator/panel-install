@@ -132,10 +132,26 @@ docker pull "$FRONTEND_IMAGE" || die "拉取 ${FRONTEND_IMAGE} 失败。请确�
     docker compose up -d
 ) || die "启动容器失败。"
 
+ready=0
+i=0
+while [ "$i" -lt 60 ]; do
+    code=$(curl -s -m 2 -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/health || true)
+    if [ "$code" = "200" ]; then
+        ready=1
+        break
+    fi
+    i=$((i + 1))
+    sleep 1
+done
+if [ "$ready" != "1" ]; then
+    die "后端 60 秒内没有就绪，安装中止。请执行 docker compose -f ${INSTALL_DIR}/docker-compose.yml logs backend 查看原因。"
+fi
+
 password=""
 i=0
 while [ "$i" -lt 20 ]; do
     password=$(docker compose -f "${INSTALL_DIR}/docker-compose.yml" logs backend 2>/dev/null | sed -n 's/.*密码:[[:space:]]*//p' | tail -n 1 || true)
+    password=$(printf '%s' "$password" | tr -d '\r')
     if [ -n "$password" ]; then
         break
     fi
@@ -143,22 +159,28 @@ while [ "$i" -lt 20 ]; do
     sleep 1
 done
 
-host_ip=$(hostname -I 2>/dev/null | awk '{print $1}')
-if [ -z "$host_ip" ]; then
-    host_ip="127.0.0.1"
+lan_ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+if [ -z "$lan_ip" ]; then
+    lan_ip="127.0.0.1"
 fi
+public_ip=$(curl -fsS -m 5 https://api64.ipify.org || curl -fsS -m 5 https://ifconfig.me || true)
+public_ip=$(printf '%s' "$public_ip" | tr -d '[:space:]')
+case "$public_ip" in
+    *[!0-9a-fA-F.:]*|"") public_ip="请使用您的服务器公网 IP" ;;
+esac
 
 echo
 echo "============================================================"
 echo "  面板安装完成"
-echo "  访问地址: http://${host_ip}:8888"
-echo "  用户名:   admin"
+echo "  公网访问地址: http://${public_ip}:8888"
+echo "  内网访问地址: http://${lan_ip}:8888"
+echo "  用户名:       admin"
 if [ -n "$password" ]; then
-    echo "  密码:     ${password}"
-    echo "  该密码只在首次初始化时生成，请立即登录并修改。"
+    echo "  密码:         ${password}"
+    echo "  该密码只在首次初始化时生成，请用公网地址登录并立即修改。"
 else
-    echo "  密码:     数据卷里已有管理员，本次没有生成新密码。"
-    echo "  请使用原先的 admin 密码登录。"
+    echo "  密码:         数据卷里已有管理员，本次没有生成新密码。"
+    echo "  请使用原先的 admin 密码，从公网地址登录。"
 fi
 echo "============================================================"
 echo
