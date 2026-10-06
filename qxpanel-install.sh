@@ -4,6 +4,8 @@
 # 镜像是私有的，新机器需要先登录：docker login -u xiaoqiang001
 # 已在运行时再次执行不会重建容器，也不会重置登录密码。
 # 要用当前目录源码自己构建时：sudo bash install.sh --build
+# 卸载：sudo bash uninstall-qxpanel.sh
+# 卸载会删除面板为网站写的 Nginx 配置，不会停止系统 80/443 上的 Nginx。
 set -e
 
 PANEL_PORT="${PANEL_PORT:-7800}"
@@ -139,17 +141,38 @@ panel_ip() {
     hostname -I 2>/dev/null | awk '{print $1}'
 }
 
+read_login_file() {
+    docker exec "$QX_NAME" sh -c 'cat /www/server/panel/data/default.pl 2>/dev/null' || true
+}
+
 print_login() {
     ip_addr=$(panel_ip)
     if [ -z "$ip_addr" ]; then
         ip_addr="服务器IP"
     fi
+    cred=""
+    i=0
+    while [ "$i" -lt 20 ]; do
+        cred=$(read_login_file)
+        if printf '%s\n' "$cred" | grep -q '^password:'; then
+            break
+        fi
+        i=$((i + 1))
+        sleep 1
+    done
+    if ! printf '%s\n' "$cred" | grep -q '^password:'; then
+        cred=$(docker logs "$QX_NAME" 2>&1 | sed -n 's/^QxPanel username: /username: /p; s/^QxPanel password: /password: /p' || true)
+    fi
+    login_user=$(printf '%s\n' "$cred" | sed -n 's/^username: //p' | tail -n 1)
+    login_pass=$(printf '%s\n' "$cred" | sed -n 's/^password: //p' | tail -n 1)
     echo ""
     echo "QxPanel 已可使用"
     echo "登录地址: http://${ip_addr}:${PANEL_PORT}/bt"
-    if docker exec "$QX_NAME" test -f /www/server/panel/data/default.pl; then
-        echo "登录信息:"
-        docker exec "$QX_NAME" cat /www/server/panel/data/default.pl
+    if [ -n "$login_user" ] && [ -n "$login_pass" ]; then
+        echo "账号: ${login_user}"
+        echo "密码: ${login_pass}"
+    else
+        echo "没有读到登录账号，请执行: sudo docker logs ${QX_NAME}"
     fi
     echo "如果这是云服务器，请在云厂商安全组放行 TCP ${PANEL_PORT}，以及你以后新建站点使用的自定义端口。"
     echo ""
