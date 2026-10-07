@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QxPanel 使用说明</title>
+  <style>
+    :root {
+      --blue: #1346C4;
+      --blue-dark: #0E3496;
+      --blue-soft: #E6EEFB;
+      --text: #1c2434;
+      --muted: #5b677a;
+      --line: #d7deea;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --ok: #0d7a3e;
+      --warn: #9a5b00;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font: 16px/1.7 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    a { color: var(--blue); }
+    .top {
+      background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+      color: #fff;
+      padding: 48px 20px 40px;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .brand { font-size: 13px; letter-spacing: .16em; opacity: .85; }
+    h1 { margin: 8px 0 12px; font-size: 34px; line-height: 1.25; }
+    .lead { max-width: 720px; margin: 0; opacity: .92; }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 28px;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+    }
+    nav a:hover { background: rgba(255,255,255,.24); }
+    main { padding: 28px 20px 64px; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 28px 28px 8px;
+      margin-bottom: 20px;
+    }
+    h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+      color: var(--blue-dark);
+    }
+    h3 { margin: 24px 0 8px; font-size: 17px; }
+    p, li { color: var(--text); }
+    .muted { color: var(--muted); }
+    .cmd {
+      position: relative;
+      background: #0f1728;
+      color: #e8eefc;
+      border-radius: 12px;
+      padding: 14px 88px 14px 16px;
+      overflow-x: auto;
+      margin: 12px 0 18px;
+    }
+    .cmd code {
+      font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre;
+    }
+    .copy {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #fff;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .copy.ok { background: var(--ok); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 20px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--blue-soft); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin: 8px 0 20px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: #fbfdff;
+    }
+    .card strong { display: block; color: var(--blue-dark); margin-bottom: 4px; }
+    .note {
+      background: var(--blue-soft);
+      border-left: 4px solid var(--blue);
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 12px 0 20px;
+    }
+    .warn {
+      background: #fff6e5;
+      border-left: 4px solid var(--warn);
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 12px 0 20px;
+    }
+    footer {
+      color: var(--muted);
+      text-align: center;
+      padding: 8px 20px 40px;
+      font-size: 13px;
+    }
+    @media (max-width: 640px) {
+      h1 { font-size: 26px; }
+      section { padding: 20px 16px 4px; }
+      .cmd { padding-right: 16px; }
+      .copy { position: static; margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="brand">QXPANEL</div>
+      <h1>使用说明</h1>
+      <p class="lead">QxPanel 是部署在 Linux 服务器上的网站管理面板。安装之后用浏览器管理网站、数据库、文件、防火墙和计划任务。面板跑在 Docker 里，默认端口是 7800。网站使用你指定的端口，由面板单独拉起一份 Nginx，不会占用系统已经在 80 和 443 上运行的网站。</p>
+      <nav>
+        <a href="#install">一键安装</a>
+        <a href="#login">登录</a>
+        <a href="#features">功能说明</a>
+        <a href="#access">网站访问</a>
+        <a href="#uninstall">一键卸载</a>
+        <a href="#reinstall">重新安装</a>
+        <a href="#faq">常见情况</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="install">
+      <h2>一键安装</h2>
+      <p>服务器需要能使用 Docker。镜像是私有仓库 <code>xiaoqiang001/qxpanel</code>，新机器要先登录 Docker Hub：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>docker login -u xiaoqiang001</code></div>
+      <p>一键安装：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>curl -fsSL https://raw.githubusercontent.com/qx8677236-creator/panel-install/main/qxpanel-install.sh | sudo bash</code></div>
+      <p>已经把源码放在当前目录时，也可以：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>sudo bash install-qxpanel.sh</code></div>
+      <p>安装脚本会做这些事：</p>
+      <ul>
+        <li>没有 Docker 时自动安装</li>
+        <li>拉取镜像 <code>xiaoqiang001/qxpanel:latest</code></li>
+        <li>创建名为 <code>qxpanel</code> 的容器，开机自启</li>
+        <li>面板监听 <code>7800</code></li>
+        <li>放行本机防火墙里的面板端口</li>
+        <li>打印登录地址、账号和密码</li>
+      </ul>
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>sudo bash install-qxpanel.sh --port 7800</code></td><td>指定面板端口</td></tr>
+          <tr><td><code>sudo bash install-qxpanel.sh --build</code></td><td>用当前目录源码在本机构建镜像</td></tr>
+          <tr><td><code>sudo bash install-qxpanel.sh --recreate</code></td><td>用最新镜像重建容器，保留现有密码</td></tr>
+          <tr><td><code>sudo bash install-qxpanel.sh</code></td><td>面板已经在运行时直接退出，不重建容器，也不改密码</td></tr>
+        </tbody>
+      </table>
+      <div class="note">云服务器还要在云厂商安全组放行 TCP <code>7800</code>，以及以后每个网站使用的端口。</div>
+    </section>
+
+    <section id="login">
+      <h2>登录和使用</h2>
+      <p>浏览器打开：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>http://服务器IP:7800/bt</code></div>
+      <div class="warn">只打开 <code>http://服务器IP:7800/</code> 会看到 404。这是入口保护，不是面板故障。</div>
+      <p>安装结束时终端会单独打印两行：<code>账号:</code> 和 <code>密码:</code>。同一份内容保存在容器内的 <code>data/default.pl</code>。面板已经在运行时再次执行安装，不会重建容器，也不会改密码，但会把现有账号和密码再打印一次。</p>
+      <p>界面固定为简体中文。右上角可以重启面板。更新、修复、购买、扫码登录、安装成功跳转和界面切换已经去掉。</p>
+      <p>登录密码连续错误会暂时锁定，不要反复尝试。</p>
+    </section>
+
+    <section id="features">
+      <h2>功能说明</h2>
+      <p>左侧保留这些菜单。</p>
+      <div class="grid">
+        <div class="card"><strong>首页</strong>查看服务器概况、负载仪表和网络。这里不提供软件商店、广告和远程助手。</div>
+        <div class="card"><strong>网站</strong>创建和维护网站，支持按 <code>IP:端口</code> 建站、反向代理和本地备份。</div>
+        <div class="card"><strong>数据库</strong>管理面板中的数据库。卸载面板不会停止宿主机 <code>127.0.0.1:3306</code> 上的另一套数据库。</div>
+        <div class="card"><strong>Docker</strong>面板容器挂载了宿主机 Docker，用来查看和管理同一台机器上的容器。</div>
+        <div class="card"><strong>安全</strong>只保留防火墙端口和 IP 封禁。扫描、木马查杀、入侵检测入口已经关闭。</div>
+        <div class="card"><strong>文件</strong>在线查看、上传、编辑和删除网站目录里的文件。根目录在 <code>/www/wwwroot/</code>。</div>
+        <div class="card"><strong>日志</strong>查看面板日志。软件日志入口已经去掉。</div>
+        <div class="card"><strong>域名</strong>管理域名和证书。申请证书时，服务器需要能访问证书机构，域名也要解析到这台机器。</div>
+        <div class="card"><strong>终端</strong>在网页里打开命令行，命令运行在面板所在的环境中。</div>
+        <div class="card"><strong>计划任务</strong>添加按时间执行的任务。网站备份按钮本身不会创建远程存储计划。</div>
+        <div class="card"><strong>设置</strong>修改面板密码、入口和安全选项。语言保持简体中文。</div>
+      </div>
+
+      <h3>网站</h3>
+      <p>创建时在域名框填写域名，或者填写 <code>IP:端口</code>，例如 <code>20.187.70.213:9002</code>。同一台服务器上，IP 相同但端口不同，可以同时存在多个网站。<code>80</code> 和 <code>443</code> 留给系统里原有的 Nginx，面板创建的网站请使用其它端口。面板端口 <code>7800</code> 不能当作网站端口。</p>
+      <p>创建成功后，面板会：</p>
+      <ul>
+        <li>在 <code>/www/wwwroot/站点目录</code> 放下网站文件</li>
+        <li>写入该网站的 Nginx 配置</li>
+        <li>让网站监听你填写的端口，包含 IPv6</li>
+        <li>尝试在本机防火墙放行这个端口</li>
+      </ul>
+      <p>网站详情里可以设置运行目录、伪静态、重定向和反向代理。反向代理填写完整目标地址，例如 <code>http://95.40.120.151:5000</code>。保存后面板会重新加载网站 Nginx，访问这个网站端口就会转到目标地址。</p>
+      <p>备份在网站列表里操作。备份文件打成 <code>.tar.gz</code>，保存在服务器本地。备份窗口只有「备份 / 恢复」，没有计划任务和远程网盘。备份结果用中文显示成功或失败。</p>
+      <p>删除网站时，弹窗里可以选择是否同时删除数据库、网站目录和防火墙端口。FTP 选项已经去掉。无论勾选什么，这个网站的 Nginx 配置都会删除，包括虚拟主机、反向代理、重定向和伪静态。删除最后一个自定义端口网站后，面板会关掉自己那份网站 Nginx。</p>
+    </section>
+
+    <section id="access">
+      <h2>网站实际怎么被访问</h2>
+      <p>系统原来的 Nginx 继续监听 <code>80</code> 和 <code>443</code>。面板网站由另一份 Nginx 监听，配置文件是容器里的 <code>/www/server/nginx/conf/qx-sites.conf</code>，每个网站一份配置，放在 <code>/www/server/panel/vhost/nginx/网站名.conf</code>。</p>
+      <ul>
+        <li>访问 <code>http://IP:网站端口/</code> 才会进入面板创建的网站</li>
+        <li>访问 <code>http://IP/</code> 仍然是系统原来的 <code>80</code> 端口网站</li>
+        <li>面板地址始终是 <code>http://IP:7800/bt</code></li>
+      </ul>
+      <p>删除网站或卸载面板时，删掉的是这份网站配置和它的监听进程，不会重载或停止 <code>80</code>/<code>443</code> 上的系统 Nginx。</p>
+    </section>
+
+    <section id="uninstall">
+      <h2>一键卸载</h2>
+      <p>一键卸载从 GitHub 下载脚本并执行。脚本会先要求输入 <code>uninstall</code>，避免误删：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>curl -fsSL https://raw.githubusercontent.com/qx8677236-creator/panel-install/main/qxpanel-uninstall.sh | sudo bash</code></div>
+      <p>已经下载过源码时，在源码目录执行同一份脚本：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>sudo bash uninstall-qxpanel.sh</code></div>
+      <p>已经确认、不需要再提问时：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>sudo bash uninstall-qxpanel.sh --yes</code></div>
+      <p>卸载会做这些事：</p>
+      <ol>
+        <li>找出面板容器里每个网站正在监听的端口。</li>
+        <li>停止命令行里带有 <code>qx-sites.conf</code> 的 Nginx。系统 Nginx 的进程不带这个配置，不会被停止。</li>
+        <li>删除网站虚拟主机、反向代理、重定向、伪静态，以及 <code>qx-sites.conf</code>。</li>
+        <li>删除容器 <code>qxpanel</code>。</li>
+        <li>删除面板数据卷 <code>qxpanel-data</code>。登录密码和站点记录会一起消失。</li>
+        <li>收回这些网站端口和面板端口在本机防火墙里的放行。<code>22</code>、<code>80</code>、<code>443</code>、<code>8000</code>、<code>3306</code> 不会收回。</li>
+      </ol>
+      <p>网站文件默认留在数据卷 <code>qxpanel-www</code> 里，只是不再有 Nginx 配置对外提供访问。连文件一起删除：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>sudo bash uninstall-qxpanel.sh --purge</code></div>
+      <div class="warn"><code>--purge</code> 必须写在命令后面，确认时只输入 <code>uninstall</code>，不要输入 <code>uninstall--purge</code>。</div>
+      <p>云厂商安全组里手工添加的端口，脚本改不到，需要在云控制台关闭。Docker 镜像会留下，方便以后重新安装。</p>
+      <p>下面这些不会被卸载脚本改动：</p>
+      <ul>
+        <li>系统 Nginx 的 <code>80</code> 和 <code>443</code></li>
+        <li>机器上另外一套监听 <code>8000</code> 的服务</li>
+        <li>宿主机 <code>127.0.0.1:3306</code> 的数据库</li>
+      </ul>
+    </section>
+
+    <section id="reinstall">
+      <h2>重新安装</h2>
+      <p>卸载后再执行安装脚本即可。这是一次新的安装，会生成新的登录密码。如果卸载时没有加 <code>--purge</code>，原来的网站文件还在 <code>qxpanel-www</code> 里，但网站记录和 Nginx 配置已经没有了，需要在面板里重新建站。</p>
+      <p>已经在运行、只想换成最新镜像时：</p>
+      <div class="cmd"><button class="copy" type="button">复制</button><code>curl -fsSL https://raw.githubusercontent.com/qx8677236-creator/panel-install/main/qxpanel-install.sh | sudo bash -s -- --recreate</code></div>
+    </section>
+
+    <section id="faq">
+      <h2>常见情况</h2>
+      <table>
+        <thead><tr><th>现象</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>打开 <code>http://IP:7800/</code> 是 404</td><td>使用 <code>http://IP:7800/bt</code></td></tr>
+          <tr><td>拉取镜像失败</td><td>先执行 <code>docker login -u xiaoqiang001</code></td></tr>
+          <tr><td>网站端口打不开</td><td>检查云安全组是否放行该 TCP 端口，以及网站是否创建成功</td></tr>
+          <tr><td>新建 <code>80</code> 端口网站后公网没有变化</td><td><code>80</code>/<code>443</code> 留给系统 Nginx，请改用其它端口</td></tr>
+          <tr><td>再次执行安装脚本没有重置密码</td><td>面板已在运行时，安装脚本不会重建容器</td></tr>
+          <tr><td>备份窗口是中文，文件在服务器本地</td><td>备份结果是 <code>.tar.gz</code>，没有远程存储</td></tr>
+          <tr><td>第一次登录没有安装成功弹窗</td><td>这是正常的。这个弹窗以前会跳到外部网站，已经去掉</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+  <footer>QxPanel 使用说明 · 镜像 xiaoqiang001/qxpanel</footer>
+  <script>
+    document.querySelectorAll(".copy").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var text = btn.parentElement.querySelector("code").innerText;
+        var done = function () {
+          btn.textContent = "已复制";
+          btn.classList.add("ok");
+          setTimeout(function () {
+            btn.textContent = "复制";
+            btn.classList.remove("ok");
+          }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(function () {
+            window.prompt("复制下面的命令", text);
+          });
+        } else {
+          window.prompt("复制下面的命令", text);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
